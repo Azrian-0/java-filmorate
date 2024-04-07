@@ -10,49 +10,52 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.*;
 
 class FilmValidatorTest {
-    private FilmValidator filmValidator;
+
+    private FilmValidator validator;
+
     private Film film;
 
     @BeforeEach
-    public void setup() {
-        filmValidator = new FilmValidator();
+    public void setUp() {
+        validator = new FilmValidator();
         film = Film.builder()
                 .name("Test Film")
                 .description("Test description")
-                .releaseDate(LocalDate.now())
+                .releaseDate(LocalDate.now().minusYears(1))
                 .duration(120)
                 .build();
     }
 
     @Test
-    public void testNameValidation() {
+    public void testValidFilm() {
+        assertDoesNotThrow(() -> validator.validate(film));
+    }
+
+    @Test
+    public void testInvalidName() {
         film.setName("");
-        ValidationException exception = assertThrows(ValidationException.class, () -> filmValidator.validate(film));
-        assertNotNull(exception);
-        assertEquals("Название фильма не может быть пустым.", exception.getMessage());
+        ValidationException exception = assertThrows(ValidationException.class, () -> validator.validate(film));
+        assertTrue(exception.getMessage().contains("Название фильма не может быть пустым."));
     }
 
     @Test
-    public void testDescriptionValidation() {
+    public void testInvalidDescription() {
         film.setDescription("X".repeat(201));
-        ValidationException exception = assertThrows(ValidationException.class, () -> filmValidator.validate(film));
-        assertNotNull(exception);
-        assertEquals("Длина описания фильма не должна превышать 200 символов.", exception.getMessage());
+        ValidationException exception = assertThrows(ValidationException.class, () -> validator.validate(film));
+        assertTrue(exception.getMessage().contains("Длина описания фильма не должна превышать 200 символов."));
     }
 
     @Test
-    public void testReleaseDateValidation() {
-        film.setReleaseDate(LocalDate.of(1895, 1, 1));
-        ValidationException exception = assertThrows(ValidationException.class, () -> filmValidator.validate(film));
-        assertNotNull(exception);
-        assertEquals("Дата релиза фильма должна быть не раньше 28 декабря 1895 года.", exception.getMessage());
+    public void testInvalidReleaseDate() {
+        film.setReleaseDate(LocalDate.of(1800, 1, 1));
+        ValidationException exception = assertThrows(ValidationException.class, () -> validator.validate(film));
+        assertTrue(exception.getMessage().contains("Дата релиза фильма должна быть не раньше 28 декабря 1895 года."));
     }
 
     @Test
-    public void testDurationValidation() {
-        film.setDuration(-1);
-        ValidationException exception = assertThrows(ValidationException.class, () -> filmValidator.validate(film));
-        assertNotNull(exception);
-        assertEquals("Продолжительность фильма должна быть положительной.", exception.getMessage());
+    public void testInvalidDuration() {
+        film.setDuration(-10);
+        ValidationException exception = assertThrows(ValidationException.class, () -> validator.validate(film));
+        assertTrue(exception.getMessage().contains("Продолжительность фильма должна быть положительной."));
     }
 }

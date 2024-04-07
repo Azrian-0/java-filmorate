@@ -2,10 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Past;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 
 @Getter
@@ -14,24 +11,25 @@ import java.time.LocalDate;
 @EqualsAndHashCode(of = {"id"})
 @Builder
 public class User {
-    private static int nextId = 0;
+    private static int nextId = 1;
 
     private Integer id;
-    @NotBlank
-    @Email(message = "Неверный формат электронной почты")
+
+    @NotBlank(message = "Электронная почта не может быть пустой.")
+    @Email(message = "Неверный формат электронной почты.")
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "Логин не может быть пустым.")
+    @Pattern(regexp = "\\S+", message = "Логин не может содержать пробелы.")
     private String login;
 
     private String name;
 
-    @NotNull
-    @Past
+    @NotNull(message = "Дата рождения не может быть пустой.")
+    @Past(message = "Дата рождения не может быть в будущем.")
     private LocalDate birthday;
 
     public static Integer incrementId() {
-        nextId++;
-        return nextId;
+        return nextId++;
     }
 }

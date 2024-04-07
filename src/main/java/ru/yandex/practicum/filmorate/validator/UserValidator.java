@@ -3,42 +3,36 @@ package ru.yandex.practicum.filmorate.validator;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import java.util.Set;
 
 public class UserValidator {
 
+    private final Validator validator;
+
+    public UserValidator() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+    }
+
     public void validate(User user) throws ValidationException {
-        if (!isEmailValid(user.getEmail())) {
-            throw new ValidationException("Электронная почта не может быть пустой и должна содержать символ @");
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        if (!violations.isEmpty()) {
+            StringBuilder errorMessage = new StringBuilder();
+            for (ConstraintViolation<User> violation : violations) {
+                errorMessage.append(violation.getMessage()).append("\n");
+            }
+            throw new ValidationException(errorMessage.toString());
         }
-        if (!isLoginValid(user.getLogin())) {
-            throw new ValidationException("Логин не может быть пустым и содержать пробелы.");
-        }
-        if (!isNameValid(user.getName(), user.getLogin())) {
-            throw new ValidationException("Имя не указано — использован логин.");
-        }
-        if (!isBirthdayValid(user.getBirthday())) {
-            throw new ValidationException("Дата рождения не может быть в будущем.");
-        }
-    }
-
-    private boolean isEmailValid(String email) {
-        return email != null && email.contains("@");
-    }
-
-    private boolean isLoginValid(String login) {
-        return login != null && !login.contains(" ");
-    }
-
-    private boolean isNameValid(String name, String login) {
-        if (name == null || name.isEmpty()) {
-            return isLoginValid(login);
-        } else {
-            return true;
+        if (!isNameValid(user)) {
+            user.setName(user.getLogin());
         }
     }
 
-    private boolean isBirthdayValid(LocalDate birthday) {
-        return !birthday.isAfter(LocalDate.now());
+    private boolean isNameValid(User user) {
+        return user.getName() != null && !user.getName().isEmpty();
     }
 }

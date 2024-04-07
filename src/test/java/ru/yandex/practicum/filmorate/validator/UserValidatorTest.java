@@ -11,51 +11,64 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserValidatorTest {
 
-    private UserValidator userValidator;
+    private UserValidator validator;
     private User user;
 
     @BeforeEach
-    public void setup() {
-        userValidator = new UserValidator();
+    public void setUp() {
+        validator = new UserValidator();
         user = User.builder()
-                .email("Test email @")
+                .email("test@example.com")
                 .login("TestLogin")
                 .name("Test name")
-                .birthday(LocalDate.now())
+                .birthday(LocalDate.now().minusYears(1))
                 .build();
     }
 
     @Test
-    public void testEmailValid() {
+    public void testValidUser() {
+        assertDoesNotThrow(() -> validator.validate(user));
+    }
+
+    @Test
+    public void testInvalidEmail() {
+        user.setEmail("invalid_email");
+        ValidationException exception = assertThrows(ValidationException.class, () -> validator.validate(user));
+        assertTrue(exception.getMessage().contains("Неверный формат электронной почты."));
+    }
+
+    @Test
+    public void testBlankEmail() {
         user.setEmail("");
-        ValidationException exception = assertThrows(ValidationException.class, () -> userValidator.validate(user));
-        assertNotNull(exception);
-        assertEquals("Электронная почта не может быть пустой и должна содержать символ @", exception.getMessage());
+        ValidationException exception = assertThrows(ValidationException.class, () -> validator.validate(user));
+        assertTrue(exception.getMessage().contains("Электронная почта не может быть пустой."));
     }
 
     @Test
-    public void testLoginValid() {
-        user.setLogin(" ");
-        ValidationException exception = assertThrows(ValidationException.class, () -> userValidator.validate(user));
-        assertNotNull(exception);
-        assertEquals("Логин не может быть пустым и содержать пробелы.", exception.getMessage());
+    public void testInvalidLogin() {
+        user.setLogin("login with spaces");
+        ValidationException exception = assertThrows(ValidationException.class, () -> validator.validate(user));
+        assertTrue(exception.getMessage().contains("Логин не может содержать пробелы."));
     }
 
     @Test
-    public void testNameValid() {
-        user.setName("");
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-        assertDoesNotThrow(() -> userValidator.validate(user));
-        assertEquals("TestLogin", user.getName());
+    public void testBlankLogin() {
+        user.setLogin("");
+        ValidationException exception = assertThrows(ValidationException.class, () -> validator.validate(user));
+        assertTrue(exception.getMessage().contains("Логин не может быть пустым."));
     }
 
     @Test
-    public void testBirthdayValid() {
-        user.setBirthday(LocalDate.now().plusYears(5));
-        ValidationException exception = assertThrows(ValidationException.class, () -> userValidator.validate(user));
-        assertNotNull(exception);
-        assertEquals("Дата рождения не может быть в будущем.", exception.getMessage());
+    public void testInvalidBirthday() {
+        user.setBirthday(LocalDate.now().plusDays(1));
+        ValidationException exception = assertThrows(ValidationException.class, () -> validator.validate(user));
+        assertTrue(exception.getMessage().contains("Дата рождения не может быть в будущем."));
+    }
+
+    @Test
+    public void testBlankBirthday() {
+        user.setBirthday(null);
+        ValidationException exception = assertThrows(ValidationException.class, () -> validator.validate(user));
+        assertTrue(exception.getMessage().contains("Дата рождения не может быть пустой."));
     }
 }

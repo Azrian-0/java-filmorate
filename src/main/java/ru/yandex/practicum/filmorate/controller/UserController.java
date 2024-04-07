@@ -47,7 +47,8 @@ public class UserController {
         if (!users.contains(user)) {
             throw new EntityNotExist("Такого пользователя не существует.");
         }
-        if (users.stream().anyMatch(existingUser -> existingUser.getEmail().equals(user.getEmail()))) {
+        if (users.stream().filter(existingUser -> !existingUser.equals(user))
+                .anyMatch(existingUser -> existingUser.getEmail().equals(user.getEmail()))) {
             throw new EntityAlreadyExist("Пользователь с таким email уже существует.");
         }
         userValidator.validate(user);
