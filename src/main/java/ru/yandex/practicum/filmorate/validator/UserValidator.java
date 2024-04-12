@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.validator;
 
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -9,6 +10,7 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.util.Set;
 
+@Component
 public class UserValidator {
 
     private final Validator validator;

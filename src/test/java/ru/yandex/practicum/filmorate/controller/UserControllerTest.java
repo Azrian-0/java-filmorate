@@ -36,7 +36,7 @@ class UserControllerTest {
     @Test
     void testFindAll() {
         User createdUser = userController.create(user);
-        Set<User> users = userController.findAll();
+        Set<User> users = userController.getAll();
         assertThat(users).contains(createdUser);
     }
 

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.validator;
 
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -10,6 +11,7 @@ import javax.validation.ValidatorFactory;
 import java.time.LocalDate;
 import java.util.Set;
 
+@Component
 public class FilmValidator {
 
     private final Validator validator;

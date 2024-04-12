@@ -4,6 +4,8 @@ import lombok.*;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -11,9 +13,10 @@ import java.time.LocalDate;
 @EqualsAndHashCode(of = {"id"})
 @Builder
 public class User {
-    private static int nextId = 1;
 
     private Integer id;
+
+    private final Set<Integer> friends = new HashSet<>();
 
     @NotBlank(message = "Электронная почта не может быть пустой.")
     @Email(message = "Неверный формат электронной почты.")
@@ -28,8 +31,4 @@ public class User {
     @NotNull(message = "Дата рождения не может быть пустой.")
     @Past(message = "Дата рождения не может быть в будущем.")
     private LocalDate birthday;
-
-    public static Integer incrementId() {
-        return nextId++;
-    }
 }

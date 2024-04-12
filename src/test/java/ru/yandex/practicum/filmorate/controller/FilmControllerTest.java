@@ -35,7 +35,7 @@ class FilmControllerTest {
     @Test
     void testFindAll() {
         Film createdFilm = filmController.create(film);
-        Set<Film> films = filmController.findAll();
+        Set<Film> films = filmController.getAll();
         assertThat(films).contains(createdFilm);
     }
 
