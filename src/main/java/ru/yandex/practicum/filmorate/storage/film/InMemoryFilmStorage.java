@@ -36,7 +36,6 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (!films.contains(film)) {
             throw new EntityNotExist("Такого фильма не существует.");
         }
-        films.remove(film);
         films.add(film);
         log.info("Фильм {} обновлен.", film);
         return film;
@@ -49,12 +48,10 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film getById(Integer id) {
-        for (Film film : films) {
-            if (film.getId().equals(id)) {
-                return film;
-            }
-        }
-        throw new EntityNotExist("Нет фильма с таким id.");
+        return films.stream()
+                .filter(film -> film.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotExist("Нет фильма с таким id."));
     }
 
     @Override

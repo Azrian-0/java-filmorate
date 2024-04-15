@@ -8,7 +8,6 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-import java.time.LocalDate;
 import java.util.Set;
 
 @Component
@@ -21,7 +20,6 @@ public class FilmValidator {
         validator = factory.getValidator();
     }
 
-
     public void validate(Film film) throws ValidationException {
         Set<ConstraintViolation<Film>> violations = validator.validate(film);
         if (!violations.isEmpty()) {
@@ -31,12 +29,5 @@ public class FilmValidator {
             }
             throw new ValidationException(errorMessage.toString());
         }
-        if (!isReleaseDateValid(film.getReleaseDate())) {
-            throw new ValidationException("Дата релиза фильма должна быть не раньше 28 декабря 1895 года.");
-        }
-    }
-
-    private boolean isReleaseDateValid(LocalDate releaseDate) {
-        return releaseDate != null && !releaseDate.isBefore(LocalDate.of(1895, 12, 28));
     }
 }

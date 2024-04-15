@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.exception.EntityNotExist;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-import ru.yandex.practicum.filmorate.validator.FilmValidator;
+
 
 import java.util.Comparator;
 import java.util.List;
@@ -19,19 +19,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmService {
 
-    private final UserStorage userStorage;
-    private final FilmStorage filmStorage;
-    private final FilmValidator filmValidator;
-
     static final int DEFAULT_POPULAR_COUNT = 10;
 
+    private final UserStorage userStorage;
+    private final FilmStorage filmStorage;
+
+
     public Film create(Film film) {
-        filmValidator.validate(film);
+
         return filmStorage.create(film);
     }
 
     public Film update(Film film) {
-        filmValidator.validate(film);
+
         return filmStorage.update(film);
     }
 

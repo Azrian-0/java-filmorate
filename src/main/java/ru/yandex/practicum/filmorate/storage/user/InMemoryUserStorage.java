@@ -52,7 +52,6 @@ public class InMemoryUserStorage implements UserStorage {
                 .anyMatch(existingUser -> existingUser.getEmail().equals(user.getEmail()))) {
             throw new EntityAlreadyExist("Пользователь с таким email уже существует.");
         }
-        users.remove(user);
         users.add(user);
         log.info("Пользователь {} обновлен.", user);
         return user;
@@ -65,12 +64,10 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User getById(Integer id) {
-        for (User user : users) {
-            if (user.getId().equals(id)) {
-                return user;
-            }
-        }
-        throw new EntityNotExist("Нет пользователя с таким id.");
+        return users.stream()
+                .filter(user -> user.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotExist("Нет пользователя с таким id."));
     }
 
     @Override
