@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -14,10 +14,9 @@ import java.time.LocalDate;
 @EqualsAndHashCode(of = {"id"})
 @Builder
 public class Film {
-    private static int nextId = 1;
-
     private Integer id;
 
+    private final Set<Integer> likes = new HashSet<>();
     @NotBlank(message = "Название фильма не может быть пустым.")
     private String name;
 
@@ -31,7 +30,9 @@ public class Film {
     @Positive(message = "Продолжительность фильма должна быть положительной.")
     private int duration;
 
-    public static Integer incrementId() {
-        return nextId++;
+    @AssertTrue(message = "Дата релиза фильма должна быть не раньше 28 декабря 1895 года.")
+    @JsonIgnore
+    public boolean isReleaseDateValid() {
+        return releaseDate != null && !releaseDate.isBefore(LocalDate.of(1895, 12, 28));
     }
 }
