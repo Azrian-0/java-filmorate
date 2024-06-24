@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.mapper.MpaRowMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
-import java.util.*;
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
