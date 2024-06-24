@@ -5,18 +5,19 @@ import lombok.*;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
 @ToString
 @EqualsAndHashCode(of = {"id"})
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Film {
     private Integer id;
 
-    private final Set<Integer> likes = new HashSet<>();
+    private Set<Integer> likes = new HashSet<>();
     @NotBlank(message = "Название фильма не может быть пустым.")
     private String name;
 
@@ -35,4 +36,8 @@ public class Film {
     public boolean isReleaseDateValid() {
         return releaseDate != null && !releaseDate.isBefore(LocalDate.of(1895, 12, 28));
     }
+
+    private LinkedHashSet<Genre> genres;
+
+    private Mpa mpa;
 }

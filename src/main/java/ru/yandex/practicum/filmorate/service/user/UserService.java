@@ -3,14 +3,12 @@ package ru.yandex.practicum.filmorate.service.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.validator.UserValidator;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -18,6 +16,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserStorage userStorage;
+
     private final UserValidator userValidator;
 
     public User create(User user) {
@@ -26,6 +25,7 @@ public class UserService {
     }
 
     public User update(User user) {
+        checkUserExist(user.getId());
         userValidator.validate(user);
         return userStorage.update(user);
     }
@@ -35,38 +35,44 @@ public class UserService {
     }
 
     public User getById(Integer id) {
+        checkUserExist(id);
         return userStorage.getById(id);
     }
 
     public void deleteById(Integer id) {
+        checkUserExist(id);
         userStorage.deleteById(id);
     }
 
     public User addFriend(Integer userId, Integer friendId) {
-        User user = getById(userId);
-        User friend = getById(friendId);
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
-        log.info("Пользователю c id: {} добавлен в друзья пользователь с id: {}.", userId, friendId);
-        return user;
+        checkUserAndFriendExist(userId, friendId);
+        return userStorage.addFriend(userId, friendId);
     }
 
     public User deleteFriend(Integer userId, Integer friendId) {
-        getById(userId).getFriends().remove(friendId);
-        getById(friendId).getFriends().remove(userId);
-        log.info("Пользователю c id: {} удалён из друзей пользователь с id: {}.", userId, friendId);
-        return getById(userId);
+        checkUserAndFriendExist(userId, friendId);
+        return userStorage.deleteFriend(userId, friendId);
     }
 
-    public List<User> getAllFriends(Integer userId) {
-        return getById(userId).getFriends().stream()
-                .map(this::getById)
-                .collect(Collectors.toList());
+    public Set<User> getFriends(Integer userId) {
+        checkUserExist(userId);
+        return userStorage.getFriends(userId);
     }
 
-    public List<User> getMutualFriends(Integer userId, Integer friendId) {
-        Set<Integer> mutualFriends = new HashSet<>(getById(userId).getFriends());
-        mutualFriends.retainAll(getById(friendId).getFriends());
-        return mutualFriends.stream().map(this::getById).collect(Collectors.toList());
+    private void checkUserExist(Integer id) {
+        if (!userStorage.isUserExist(id)) {
+            throw new EntityNotFoundException();
+        }
+    }
+
+    public Set<User> getMutualFriends(Integer userId, Integer friendId) {
+        checkUserAndFriendExist(userId, friendId);
+        return userStorage.getMutualFriends(userId, friendId);
+    }
+
+    private void checkUserAndFriendExist(Integer userId, Integer friendId) {
+        if (!userStorage.isUserExist(userId) || !userStorage.isUserExist(friendId)) {
+            throw new EntityNotFoundException();
+        }
     }
 }

@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service.user;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exception.EntityNotExist;
@@ -12,6 +13,7 @@ import ru.yandex.practicum.filmorate.validator.UserValidator;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class UserServiceTest {
     @Autowired
+    @Qualifier("inMemoryUserStorage")
     private UserStorage userStorage;
     @Autowired
     private UserService userService;
@@ -85,10 +88,10 @@ class UserServiceTest {
     }
 
     @Test
-    void getAllFriends() {
+    void getFriends() {
         userService.addFriend(1, 2);
 
-        List<User> friends = userService.getAllFriends(1);
+        Set<User> friends = userService.getFriends(1);
         assertEquals(1, friends.size());
         assertTrue(friends.contains(user1));
     }
@@ -97,7 +100,7 @@ class UserServiceTest {
     void getMutualFriends() {
         userService.addFriend(1, 2);
         userService.addFriend(1, 3);
-        List<User> mutualFriends = userService.getMutualFriends(2, 3);
+        Set<User> mutualFriends = userService.getMutualFriends(2, 3);
 
         assertEquals(1, mutualFriends.size());
         assertTrue(mutualFriends.contains(user));

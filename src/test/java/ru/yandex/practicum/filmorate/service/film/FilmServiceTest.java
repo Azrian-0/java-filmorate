@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service.film;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.exception.EntityNotExist;
@@ -16,6 +17,7 @@ import ru.yandex.practicum.filmorate.validator.UserValidator;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,12 +25,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class FilmServiceTest {
 
+    @Qualifier("inMemoryFilmStorage")
     @Autowired
     private FilmStorage filmStorage;
     @Autowired
     private FilmService filmService;
     @Autowired
     private FilmValidator filmValidator;
+    @Qualifier("inMemoryUserStorage")
     @Autowired
     private UserStorage userStorage;
     @Autowired

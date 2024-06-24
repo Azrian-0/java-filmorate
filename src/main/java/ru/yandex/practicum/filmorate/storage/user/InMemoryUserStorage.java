@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import javax.validation.Valid;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -85,5 +86,39 @@ public class InMemoryUserStorage implements UserStorage {
             }
         }
         return false;
+    }
+
+    @Override
+    public User addFriend(Integer userId, Integer friendId) {
+        getById(userId).getFriends().add(friendId);
+        getById(friendId).getFriends().add(userId);
+        log.info("Пользователи {} и {} добавлены в друзья.", getById(userId).getLogin(), getById(friendId).getLogin());
+        return getById(userId);
+    }
+
+    @Override
+    public User deleteFriend(Integer userId, Integer friendId) {
+        getById(userId).getFriends().remove(friendId);
+        getById(friendId).getFriends().remove(userId);
+        log.info("Пользователи {} и {} удалены из друзей.", getById(userId).getLogin(), getById(friendId).getLogin());
+        return getById(userId);
+    }
+
+    @Override
+    public Set<User> getFriends(Integer userId) {
+        return users.stream()
+                .filter(user -> user.getFriends().contains(userId))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<User> getMutualFriends(Integer userId, Integer friendId) {
+        Set<User> mutualFriends = new HashSet<>();
+        for (Integer id : getById(userId).getFriends()) {
+            if (getById(friendId).getFriends().contains(id)) {
+                mutualFriends.add(getById(id));
+            }
+        }
+        return mutualFriends;
     }
 }

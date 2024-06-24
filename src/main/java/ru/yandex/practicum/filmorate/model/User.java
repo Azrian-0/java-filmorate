@@ -4,19 +4,20 @@ import lombok.*;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
 @ToString
 @EqualsAndHashCode(of = {"id"})
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     private Integer id;
 
-    private final Set<Integer> friends = new HashSet<>();
+    private Set<Integer> friends = new HashSet<>();
 
     @NotBlank(message = "Электронная почта не может быть пустой.")
     @Email(message = "Неверный формат электронной почты.")
