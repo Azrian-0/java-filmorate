@@ -18,7 +18,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class Film {
 
-    private final static LocalDate FIRST_FILM_RELEASED = LocalDate.of(1895, 12, 28);
+    private static final LocalDate FIRST_FILM_RELEASED = LocalDate.of(1895, 12, 28);
 
     private Integer id;
 
@@ -47,7 +47,7 @@ public class Film {
     @NotNull
     private Mpa mpa;
 
-    public void addGenre(Genre genre){
+    public void addGenre(Genre genre) {
         this.genres.add(genre);
     }
 }

@@ -31,7 +31,7 @@ public class FilmService {
             throw new BadRequestException();
         }
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
-            if (!genreStorage.checkGenresExist(film.getGenres().stream().map(Genre::getId).collect(Collectors.toList()))){
+            if (!genreStorage.checkGenresExist(film.getGenres().stream().map(Genre::getId).collect(Collectors.toList()))) {
                 throw new BadRequestException();
             }
         }
