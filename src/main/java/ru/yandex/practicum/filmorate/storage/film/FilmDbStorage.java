@@ -7,9 +7,8 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.mapper.FilmRowMapper;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.film.GenreService;
 import ru.yandex.practicum.filmorate.service.film.MpaService;
-import ru.yandex.practicum.filmorate.storage.like.LikeDbStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 
 import java.util.*;
 
@@ -21,8 +20,7 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbc;
     private final FilmRowMapper mapper;
     private final MpaService mpaService;
-    private final GenreService genreService;
-    private final LikeDbStorage likeDbStorage;
+    private final GenreDbStorage genreDbStorage;
 
     private Map<String, Object> toMap(Film film) {
         Map<String, Object> parameters = new HashMap<>();
@@ -43,8 +41,8 @@ public class FilmDbStorage implements FilmStorage {
         Number id = insertActor.executeAndReturnKey(toMap(film));
 
         film.setId(id.intValue());
-        genreService.addGenresToFilm(film);
-        genreService.addGenreNamesToFilm(film);
+        genreDbStorage.addGenresToFilm(film);
+        genreDbStorage.addGenreNamesToFilm(film);
         mpaService.addMpaToFilm(film);
         return film;
     }
@@ -58,13 +56,13 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Set<Film> getAll() {
-        String sql = "SELECT * FROM films ORDER BY id";
+        String sql = "SELECT f.*, r.ID AS rating_id, r.NAME AS rating_name FROM films f INNER JOIN RATINGS R on R.ID = f.RATING_ID ORDER BY f.ID";
         return new LinkedHashSet<>(jdbc.query(sql, mapper));
     }
 
     @Override
     public Film getById(Integer id) {
-        String sql = "SELECT * FROM films WHERE id = ?";
+        String sql = "SELECT f.*,  r.ID AS rating_id, r.NAME AS rating_name, FROM films f INNER JOIN RATINGS R on R.ID = f.RATING_ID  WHERE f.id = ?";
         return jdbc.queryForObject(sql, mapper, id);
     }
 
@@ -91,9 +89,10 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getPopular(Integer filmsCount) {
-        String sql = "SELECT f.*, COUNT(l.user_id) AS likes " +
+        String sql = "SELECT f.*, r.ID AS rating_id, r.NAME AS rating_name, COUNT(l.user_id) AS likes " +
                 "FROM films f " +
                 "LEFT JOIN likes l ON f.id = l.film_id " +
+                "INNER JOIN RATINGS R on R.ID = f.RATING_ID " +
                 "GROUP BY f.id " +
                 "ORDER BY likes DESC " +
                 "LIMIT ?";

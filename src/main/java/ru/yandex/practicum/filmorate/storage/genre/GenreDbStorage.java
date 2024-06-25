@@ -7,8 +7,10 @@ import ru.yandex.practicum.filmorate.mapper.GenreRowMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -63,10 +65,12 @@ public class GenreDbStorage implements GenreStorage {
         Integer filmId = film.getId();
         LinkedHashSet<Genre> genreSet = film.getGenres();
         if (genreSet != null && !genreSet.isEmpty()) {
+            String mergeSql = "MERGE INTO films_genres (film_id, genre_id) KEY(film_id, genre_id) VALUES (?, ?)";
+            List<Object[]> batchArgs = new ArrayList<>();
             for (Genre genre : genreSet) {
-                String mergeSql = "MERGE INTO films_genres (film_id, genre_id) KEY(film_id, genre_id) VALUES (?, ?)";
-                jdbc.update(mergeSql, filmId, genre.getId());
+                batchArgs.add(new Object[]{filmId, genre.getId()});
             }
+            jdbc.batchUpdate(mergeSql, batchArgs);
         }
     }
 
@@ -87,6 +91,16 @@ public class GenreDbStorage implements GenreStorage {
         return count != null && count > 0;
     }
 
+    public boolean checkGenresExist(List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return false;
+        }
+        String placeholders = String.join(",", ids.stream().map(id -> "?").toArray(String[]::new));
+        String sql = "SELECT COUNT(*) FROM genres WHERE id IN (" + placeholders + ")";
+        Integer count = jdbc.queryForObject(sql, Integer.class, ids.toArray());
+        return count != null && count > 0;
+    }
+
     public void addGenreNamesToFilm(Film film) {
         Integer filmId = film.getId();
         String sql = "SELECT g.id, g.name FROM genres g " +
@@ -101,5 +115,28 @@ public class GenreDbStorage implements GenreStorage {
         }, filmId);
         LinkedHashSet<Genre> genres = new LinkedHashSet<>(genreList);
         film.setGenres(genres);
+    }
+
+    @Override
+    public void load(Collection<Film> films) {
+        final Map<Integer, Film> filmById = films.stream().collect(Collectors.toMap(Film::getId, film -> film, (a, b) -> b));
+
+        String inSql = String.join(",", Collections.nCopies(films.size(), "?"));
+
+        final String sqlQuery = "SELECT g.*, fg.FILM_ID " +
+                "FROM GENRES g " +
+                "JOIN films_genres fg ON fg.GENRE_ID = g.ID " +
+                "WHERE fg.FILM_ID IN (" + inSql + ")";
+
+        jdbc.query(sqlQuery, (rs, rowNum) -> {
+            final Integer filmId = rs.getInt("FILM_ID");
+            final Film film = filmById.get(filmId);
+            film.addGenre(makeGenre(rs, rowNum));
+            return film;
+        }, films.stream().map(Film::getId).toArray());
+    }
+
+    private Genre makeGenre(ResultSet rs, int rowNum) throws SQLException {
+        return new Genre(rs.getInt("ID"), rs.getString("NAME"));
     }
 }

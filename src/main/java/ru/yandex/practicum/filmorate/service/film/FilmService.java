@@ -12,9 +12,9 @@ import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -31,14 +31,8 @@ public class FilmService {
             throw new BadRequestException();
         }
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
-            Set<Integer> genreIds = new HashSet<>();
-            for (Genre genre : film.getGenres()) {
-                if (!genreStorage.checkGenreExist(genre.getId())) {
-                    throw new BadRequestException();
-                }
-                if (!genreIds.add(genre.getId())) {
-                    throw new BadRequestException();
-                }
+            if (!genreStorage.checkGenresExist(film.getGenres().stream().map(Genre::getId).collect(Collectors.toList()))){
+                throw new BadRequestException();
             }
         }
         return filmStorage.create(film);
@@ -46,7 +40,9 @@ public class FilmService {
 
     public Film getById(Integer id) {
         checkFilmExist(id);
-        return filmStorage.getById(id);
+        Film film = filmStorage.getById(id);
+        genreStorage.load(List.of(film));
+        return film;
     }
 
     public Film update(Film film) {
@@ -60,16 +56,22 @@ public class FilmService {
     }
 
     public Set<Film> getAll() {
-        return filmStorage.getAll();
+        Set<Film> films = filmStorage.getAll();
+        genreStorage.load(films);
+        return films;
     }
 
     public Film addLike(Integer filmId, Integer userId) {
         checkFilmAndUserExist(filmId, userId);
-        return filmStorage.addLike(filmId, userId);
+        Film film = filmStorage.addLike(filmId, userId);
+        genreStorage.load(List.of(film));
+        return film;
     }
 
     public List<Film> getPopular(Integer filmsCount) {
-        return filmStorage.getPopular(filmsCount);
+        List<Film> films = filmStorage.getPopular(filmsCount);
+        genreStorage.load(films);
+        return films;
     }
 
     public Film deleteLike(Integer filmId, Integer userId) {

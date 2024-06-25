@@ -95,28 +95,25 @@ class FilmorateApplicationTests {
                 .build());
 
         user = User.builder()
-                .email("test@example.com")
-                .login("TestLogin")
+                .email("test@example1.com")
+                .login("TestLogin1")
                 .name("Test name")
                 .birthday(LocalDate.now().minusYears(1))
                 .build();
-        user.setFriends(new HashSet<>());
 
         user1 = User.builder()
-                .email("test1@example.com")
-                .login("TestLogin")
+                .email("test1@example2.com")
+                .login("TestLogin2")
                 .name("Test name")
                 .birthday(LocalDate.now().minusYears(1))
                 .build();
-        user1.setFriends(new HashSet<>());
 
         user2 = User.builder()
-                .email("test1@example.com")
-                .login("TestLogin")
+                .email("test1@example3.com")
+                .login("TestLogin3")
                 .name("Test name")
                 .birthday(LocalDate.now().minusYears(1))
                 .build();
-        user2.setFriends(new HashSet<>());
     }
 
     @Test

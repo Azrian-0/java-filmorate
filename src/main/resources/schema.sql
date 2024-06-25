@@ -60,8 +60,9 @@ CREATE TABLE IF NOT EXISTS likes
 CREATE INDEX IF NOT EXISTS idx_films_rating_id ON films (rating_id);
 CREATE INDEX IF NOT EXISTS idx_films_genres_film_id ON films_genres (film_id);
 CREATE INDEX IF NOT EXISTS idx_films_genres_genre_id ON films_genres (genre_id);
-CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
 CREATE INDEX IF NOT EXISTS idx_friends_user_id ON friends (user_id);
 CREATE INDEX IF NOT EXISTS idx_friends_friend_id ON friends (friend_id);
 CREATE INDEX IF NOT EXISTS idx_likes_film_id ON likes (film_id);
 CREATE INDEX IF NOT EXISTS idx_likes_user_id ON likes (user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS USER_EMAIL_UINDEX ON USERS (email);
+CREATE UNIQUE INDEX IF NOT EXISTS USER_LOGIN_UINDEX ON USERS (login);

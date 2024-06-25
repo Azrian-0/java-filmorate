@@ -51,13 +51,9 @@ public class GenreService {
         genreStorage.addGenresToFilm(film);
     }
 
-    ;
-
     public void addGenreNamesToFilm(Film film) {
         genreStorage.addGenreNamesToFilm(film);
     }
-
-    ;
 
     public LinkedHashSet<Genre> getGenresByFilmId(Integer filmId) {
         return genreStorage.getGenresByFilmId(filmId);

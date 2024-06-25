@@ -17,6 +17,9 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Film {
+
+    private final static LocalDate FIRST_FILM_RELEASED = LocalDate.of(1895, 12, 28);
+
     private Integer id;
 
     private Set<Integer> likes = new HashSet<>();
@@ -36,10 +39,15 @@ public class Film {
     @AssertTrue(message = "Дата релиза фильма должна быть не раньше 28 декабря 1895 года.")
     @JsonIgnore
     public boolean isReleaseDateValid() {
-        return releaseDate != null && !releaseDate.isBefore(LocalDate.of(1895, 12, 28));
+        return releaseDate != null && !releaseDate.isBefore(FIRST_FILM_RELEASED);
     }
 
-    private LinkedHashSet<Genre> genres;
+    private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
 
+    @NotNull
     private Mpa mpa;
+
+    public void addGenre(Genre genre){
+        this.genres.add(genre);
+    }
 }

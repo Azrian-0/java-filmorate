@@ -4,8 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,11 +21,17 @@ class FilmValidatorTest {
     public void setUp() {
         validator = new FilmValidator();
         film = Film.builder()
-                .name("Test Film")
+                .name("First Test Film")
                 .description("Test description")
                 .releaseDate(LocalDate.now().minusYears(1))
                 .duration(120)
                 .build();
+        film.setGenres(new LinkedHashSet<>());
+        film.setLikes(new LinkedHashSet<>());
+        film.setMpa(Mpa.builder()
+                .id(1)
+                .name("G")
+                .build());
     }
 
     @Test
