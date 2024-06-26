@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -62,13 +61,13 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/friends")
-    public List<User> getUserFriends(@PathVariable Integer userId) {
+    public Set<User> getUserFriends(@PathVariable Integer userId) {
         log.info("Обработан GET user {} friends запрос.", userId);
-        return userService.getAllFriends(userId);
+        return userService.getFriends(userId);
     }
 
     @GetMapping("/{userId}/friends/common/{friendId}")
-    public List<User> getMutualFriends(@PathVariable Integer userId, @PathVariable Integer friendId) {
+    public Set<User> getMutualFriends(@PathVariable Integer userId, @PathVariable Integer friendId) {
         log.info("Обработан GET user {} mutual friends запрос.", userId);
         return userService.getMutualFriends(userId, friendId);
     }
