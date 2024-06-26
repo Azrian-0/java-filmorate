@@ -59,12 +59,6 @@ public class UserService {
         return userStorage.getFriends(userId);
     }
 
-    private void checkUserExist(Integer id) {
-        if (!userStorage.isUserExist(id)) {
-            throw new EntityNotFoundException();
-        }
-    }
-
     public Set<User> getMutualFriends(Integer userId, Integer friendId) {
         checkUserAndFriendExist(userId, friendId);
         return userStorage.getMutualFriends(userId, friendId);
@@ -72,6 +66,12 @@ public class UserService {
 
     private void checkUserAndFriendExist(Integer userId, Integer friendId) {
         if (!userStorage.isUserExist(userId) || !userStorage.isUserExist(friendId)) {
+            throw new EntityNotFoundException();
+        }
+    }
+
+    private void checkUserExist(Integer id) {
+        if (!userStorage.isUserExist(id)) {
             throw new EntityNotFoundException();
         }
     }

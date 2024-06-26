@@ -35,7 +35,11 @@ public class FilmService {
                 throw new BadRequestException();
             }
         }
-        return filmStorage.create(film);
+        film = filmStorage.create(film);
+        genreStorage.addGenresToFilm(film);
+        genreStorage.addGenreNamesToFilm(film);
+        mpaStorage.addMpaToFilm(film);
+        return film;
     }
 
     public Film getById(Integer id) {

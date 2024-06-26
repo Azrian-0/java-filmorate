@@ -7,8 +7,6 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.mapper.FilmRowMapper;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.film.MpaService;
-import ru.yandex.practicum.filmorate.storage.genre.GenreDbStorage;
 
 import java.util.*;
 
@@ -19,18 +17,6 @@ public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbc;
     private final FilmRowMapper mapper;
-    private final MpaService mpaService;
-    private final GenreDbStorage genreDbStorage;
-
-    private Map<String, Object> toMap(Film film) {
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("name", film.getName());
-        parameters.put("description", film.getDescription());
-        parameters.put("release_date", film.getReleaseDate());
-        parameters.put("duration", film.getDuration());
-        parameters.put("rating_id", film.getMpa().getId());
-        return parameters;
-    }
 
     @Override
     public Film create(Film film) {
@@ -41,9 +27,6 @@ public class FilmDbStorage implements FilmStorage {
         Number id = insertActor.executeAndReturnKey(toMap(film));
 
         film.setId(id.intValue());
-        genreDbStorage.addGenresToFilm(film);
-        genreDbStorage.addGenreNamesToFilm(film);
-        mpaService.addMpaToFilm(film);
         return film;
     }
 
@@ -62,7 +45,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getById(Integer id) {
-        String sql = "SELECT f.*,  r.ID AS rating_id, r.NAME AS rating_name, FROM films f INNER JOIN RATINGS R on R.ID = f.RATING_ID  WHERE f.id = ?";
+        String sql = "SELECT f.*,  r.ID AS rating_id, r.NAME AS rating_name FROM films f INNER JOIN RATINGS R on R.ID = f.RATING_ID  WHERE f.id = ?";
         return jdbc.queryForObject(sql, mapper, id);
     }
 
@@ -104,5 +87,15 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "SELECT COUNT(*) FROM films WHERE id = ?";
         Integer count = jdbc.queryForObject(sql, Integer.class, id);
         return count != null && count > 0;
+    }
+
+    private Map<String, Object> toMap(Film film) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("name", film.getName());
+        parameters.put("description", film.getDescription());
+        parameters.put("release_date", film.getReleaseDate());
+        parameters.put("duration", film.getDuration());
+        parameters.put("rating_id", film.getMpa().getId());
+        return parameters;
     }
 }
