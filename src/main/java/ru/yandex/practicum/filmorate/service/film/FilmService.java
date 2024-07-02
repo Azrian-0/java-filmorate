@@ -3,13 +3,15 @@ package ru.yandex.practicum.filmorate.service.film;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.EntityNotExist;
+import ru.yandex.practicum.filmorate.exception.BadRequestException;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,58 +21,77 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmService {
 
-    static final int DEFAULT_POPULAR_COUNT = 10;
-
-    private final UserStorage userStorage;
     private final FilmStorage filmStorage;
-
+    private final UserStorage userStorage;
+    private final MpaStorage mpaStorage;
+    private final GenreStorage genreStorage;
 
     public Film create(Film film) {
-
-        return filmStorage.create(film);
-    }
-
-    public Film update(Film film) {
-
-        return filmStorage.update(film);
-    }
-
-    public Set<Film> getAll() {
-        return filmStorage.getAll();
+        if (film.getMpa() != null && !mpaStorage.checkMpaExist(film.getMpa().getId())) {
+            throw new BadRequestException();
+        }
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            if (!genreStorage.checkGenresExist(film.getGenres().stream().map(Genre::getId).collect(Collectors.toList()))) {
+                throw new BadRequestException();
+            }
+        }
+        film = filmStorage.create(film);
+        genreStorage.addGenresToFilm(film);
+        genreStorage.addGenreNamesToFilm(film);
+        mpaStorage.addMpaToFilm(film);
+        return film;
     }
 
     public Film getById(Integer id) {
-        return filmStorage.getById(id);
+        checkFilmExist(id);
+        Film film = filmStorage.getById(id);
+        genreStorage.load(List.of(film));
+        return film;
+    }
+
+    public Film update(Film film) {
+        checkFilmExist(film.getId());
+        return filmStorage.update(film);
     }
 
     public void deleteById(Integer id) {
+        checkFilmExist(id);
         filmStorage.deleteById(id);
     }
 
+    public Set<Film> getAll() {
+        Set<Film> films = filmStorage.getAll();
+        genreStorage.load(films);
+        return films;
+    }
+
     public Film addLike(Integer filmId, Integer userId) {
-        if (!userStorage.isUserExist(userId)) {
-            throw new EntityNotExist("Нет пользователя с таким id.");
-        }
-        Film film = filmStorage.getById(filmId);
-        film.getLikes().add(userId);
-        log.info("Добавлен лайк фильму: {} от пользователя c id: {}.", film.getName(), userId);
+        checkFilmAndUserExist(filmId, userId);
+        Film film = filmStorage.addLike(filmId, userId);
+        genreStorage.load(List.of(film));
         return film;
+    }
+
+    public List<Film> getPopular(Integer filmsCount) {
+        List<Film> films = filmStorage.getPopular(filmsCount);
+        genreStorage.load(films);
+        return films;
     }
 
     public Film deleteLike(Integer filmId, Integer userId) {
-        if (!userStorage.isUserExist(userId)) {
-            throw new EntityNotExist("Нет пользователя с таким id.");
-        }
-        Film film = filmStorage.getById(filmId);
-        film.getLikes().remove(userId);
-        log.info("Удален лайк фильму: {} от пользователя c id: {}.", film.getName(), userId);
-        return film;
+        checkFilmAndUserExist(filmId, userId);
+        return filmStorage.deleteLike(filmId, userId);
     }
 
-    public List<Film> getPopular(int filmsCount) {
-        return filmStorage.getAll().stream()
-                .sorted(Comparator.comparingInt((Film f) -> f.getLikes().size()).reversed())
-                .limit(filmsCount > 0 ? filmsCount : DEFAULT_POPULAR_COUNT)
-                .collect(Collectors.toList());
+    private void checkFilmExist(Integer id) {
+        if (!filmStorage.isFilmExist(id)) {
+            throw new EntityNotFoundException();
+        }
+    }
+
+    private void checkFilmAndUserExist(Integer filmId, Integer userId) {
+        if (!filmStorage.isFilmExist(filmId) || !(userStorage.isUserExist(userId))) {
+            throw new EntityNotFoundException();
+        }
     }
 }

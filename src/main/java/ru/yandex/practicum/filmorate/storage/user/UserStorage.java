@@ -17,4 +17,12 @@ public interface UserStorage {
     void deleteById(Integer id);
 
     boolean isUserExist(Integer id);
+
+    User addFriend(Integer userId, Integer friendId);
+
+    User deleteFriend(Integer userId, Integer friendId);
+
+    Set<User> getFriends(Integer userId);
+
+    Set<User> getMutualFriends(Integer id, Integer otherId);
 }
